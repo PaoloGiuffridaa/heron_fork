@@ -10,6 +10,7 @@ verdicts = []
 KEYWORDS = ["urgent", "verify", "suspended", "password", "expires", "act now",
             "congratulations", "winner", "claim", "immediately", "gift card"]
 
+#def check_mail(folder="data/samples/", flagged=[]): #this is the correct folder
 def check_mail(folder="/home/lgarcia/mail_export/", flagged=[]):
     files = os.listdir(folder)
     for fn in files:
