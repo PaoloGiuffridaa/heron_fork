@@ -10,13 +10,12 @@ verdicts = []
 KEYWORDS = ["urgent", "verify", "suspended", "password", "expires", "act now",
             "congratulations", "winner", "claim", "immediately", "gift card"]
 
-#def check_mail(folder="data/samples/", flagged=[]): #this is the correct folder
-def check_mail(folder="/home/lgarcia/mail_export/", flagged=[]):
-    files = os.listdir(folder)
+def check_mail(folder, flagged=[]):
+    files = pathlib.listdir(folder)
     for fn in files:
         if not fn.endswith(".eml"):
             continue
-        raw = open(folder + "/" + fn, encoding="utf-8", errors="ignore").read()
+        raw = open(pathlib.path.join(folder,fn), encoding="utf-8", errors="ignore").read()
         s = 0
         try:
             frm = re.search("From: (.*)", raw).group(1)
@@ -72,7 +71,7 @@ def check_mail(folder="/home/lgarcia/mail_export/", flagged=[]):
     print("flagged:", flagged)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        check_mail(sys.argv[1])
-    else:
-        check_mail()
+    if len(sys.argv) != 2:
+        print("you have to pass a folder as argument")
+        sys.exit(2)
+    check_mail(sys.argv[1])
