@@ -1,6 +1,7 @@
 # quick phishing checker for the mail export - L. Garcia, march 2025
 # TODO: make this nicer at some point
 import re
+import os
 import pathlib
 import sys
 
@@ -21,11 +22,11 @@ KEYWORDS = ["urgent", "verify", "suspended", "password", "expires", "act now",
             "congratulations", "winner", "claim", "immediately", "gift card"]
 
 def check_mail(folder, flagged=[]):
-    files = pathlib.listdir(folder)
+    files = os.listdir(folder)
     for fn in files:
         if not fn.endswith(".eml"):
             continue
-        raw = open(pathlib.path.join(folder,fn), encoding="utf-8", errors="ignore").read()
+        raw = open(os.path.join(folder,fn), encoding="utf-8", errors="ignore").read()
         s = 0
         try:
             frm = re.search("From: (.*)", raw).group(1)
@@ -82,6 +83,6 @@ def check_mail(folder, flagged=[]):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("you have to pass a folder as argument")
+        print("you have to pass a folder as argument", file=sys.stderr)
         sys.exit(2)
     check_mail(sys.argv[1])
