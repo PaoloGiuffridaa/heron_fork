@@ -21,7 +21,11 @@ verdicts = []
 KEYWORDS = ["urgent", "verify", "suspended", "password", "expires", "act now",
             "congratulations", "winner", "claim", "immediately", "gift card"]
 
-def check_mail(folder, flagged=[]):
+def check_mail(folder, flagged = None):
+
+    if flagged is None:
+        flagged = []
+    
     files = os.listdir(folder)
     for fn in files:
         if not fn.endswith(".eml"):
