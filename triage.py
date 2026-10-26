@@ -43,7 +43,27 @@ def sender_domain(address):
         return None
     return match.group(1)
 
-def check_mail(folder, flagged = None):
+def compute_verdict(score):
+    """Map a score to a verdict"""
+    if score >= PHISHING_THRESHOLD:
+        return "PHISHING"
+    elif score >= SUSPICIOUS_THRESHOLD:
+        return  "suspicious"
+    else:
+        return "ok"
+
+def report(verdicts):
+    """print the verdicts and save them in the result file"""
+    print(f"checked {len(verdicts)} mails")
+    for v in verdicts:
+        print(" ", v[0], "->", v[1], "(score", str(v[2]) + ")")
+    with open("results.txt", "w") as out:
+        out.write(str(verdicts))
+    
+    print("flagged:", [v[0] for v in verdicts if v[1] == 'PHISHING'])
+
+def check_mail(folder):
+    """Score every email file in the folder. Return (filename, verdict, score) tuples."""
 
     scores = {}
     verdicts = []
@@ -89,28 +109,16 @@ def check_mail(folder, flagged = None):
             s = s + W_REPLY_TO_MISMATCH
 
         scores[fn] = s
-        if s >= PHISHING_THRESHOLD:
-            verdicts.append((fn, "PHISHING", s))
-            flagged.append(fn)
-        elif s >= SUSPICIOUS_THRESHOLD:
-            verdicts.append((fn, "suspicious", s))
-        else:
-            verdicts.append((fn, "ok", s))
-    print("checked", len(scores), "mails")
-    for v in verdicts:
-        print(" ", v[0], "->", v[1], "(score", str(v[2]) + ")")
+        verdicts.append((fn, compute_verdict(s), s)) #append a tuple of filename, verdict, score  
 
-    with open("results.txt", "w") as out:
-        out.write(str(verdicts))
-    
-    print("flagged:", flagged)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("you have to pass a folder as argument", file=sys.stderr)
         sys.exit(2)
     try: 
-        check_mail(sys.argv[1])
+        verdicts = check_mail(sys.argv[1])
+        report(verdicts)
     except FileNotFoundError:
         print("error: No such folder", file=sys.stderr)
         sys.exit(1)
