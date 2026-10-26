@@ -1,4 +1,5 @@
-import re
+from email import message_from_string, policy
+from email.utils import parseaddr
 import os
 import sys
 
@@ -16,32 +17,17 @@ BRANDS = ["paypal", "microsoft", "amazon"]
 KEYWORDS = ["urgent", "verify", "suspended", "password", "expires", "act now",
             "congratulations", "winner", "claim", "immediately", "gift card"]
 
-def header(raw, name):
-    """_Return the value of the first occurence of the "name:" pattern in the email header, or '?' if missing
 
-    Args:
-        raw (file): the file where the pattern is searched
-        name (str): the pattern to search 
-
-    Returns:
-        str: "?" is there in no match, otherwise the row matched
-    """
-    match = re.search(name + ': (.*)', raw) # (.*) means takes everithing after that and before a newline
-    if match is None:
-        return "?"
-    else:
-        return match.group(1)
-
-def sender_domain(address):
+def sender_domain(header_value):
     """return the email address domain if exists, otherwise None
 
     Args:
         address (_type_): _description_
     """
-    match = re.search("@([a-zA-Z0-9.-]+)", address)
-    if match is None:
+    _, address = parseaddr(header_value)
+    if "@" not in address:
         return None
-    return match.group(1)
+    return address.split("@")[1].lower()
 
 def compute_verdict(score):
     """Map a score to a verdict"""
@@ -77,9 +63,12 @@ def check_mail(folder):
             
         s = 0
         
-        frm = header(raw, "From")
-
+        msg = message_from_string(raw, policy.default)
+        frm = str(msg.get("From", ""))
+        reply_to = str(msg.get("Reply-To", ""))
+        
         low = raw.lower()
+
         for kw in KEYWORDS:
             if kw in low:
                 s = s + W_KEYWORD
@@ -100,7 +89,7 @@ def check_mail(folder):
 
         # reply-to different from from
         from_domain = sender_domain(frm)
-        reply_domain = sender_domain(header(raw, "Reply-To")) #we first extract the Reply-To field
+        reply_domain = sender_domain(reply_to) 
 
         if from_domain and reply_domain and (from_domain != reply_domain):
             s = s + W_REPLY_TO_MISMATCH
