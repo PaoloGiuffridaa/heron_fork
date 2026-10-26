@@ -14,9 +14,38 @@ W_REPLY_TO_MISMATCH = 2
 PHISHING_THRESHOLD = 5
 SUSPICIOUS_THRESHOLD = 3
 
+BRANDS = ["paypal", "microsoft", "amazon"]
+
 
 KEYWORDS = ["urgent", "verify", "suspended", "password", "expires", "act now",
             "congratulations", "winner", "claim", "immediately", "gift card"]
+
+def header(raw, name):
+    """_Return the value of the first occurence of the "name:" pattern in the email header, or '?' if missing
+
+    Args:
+        raw (file): the file where the pattern is searched
+        name (str): the pattern to search 
+
+    Returns:
+        str: "?" is there in no match, otherwise the row matched
+    """
+    match = re.search(name + ': (.*)', raw) # (.*) means takes everithing after that and before a newline
+    if match is None:
+        return "?"
+    else:
+        return match.group(1)
+
+def sender_domain(address):
+    """return the email address domain if exists, otherwise None
+
+    Args:
+        address (_type_): _description_
+    """
+    match = re.search("@([a-zA-Z0-9.-]+)", address)
+    if match is None:
+        return None
+    return match.group(1)
 
 def check_mail(folder, flagged = None):
 
@@ -34,14 +63,10 @@ def check_mail(folder, flagged = None):
             raw.read()
             
         s = 0
-        try:
-            frm = re.search("From: (.*)", raw).group(1)
-        except:
-            frm = "?"
-        try:
-            subj = re.search("Subject: (.*)", raw).group(1)
-        except:
-            subj = "?"
+        
+        frm = header(raw, "From")
+        subj = header(raw, "Subject")
+
         low = raw.lower()
         for kw in KEYWORDS:
             if kw in low:
@@ -54,23 +79,20 @@ def check_mail(folder, flagged = None):
             if "xn--" in u:
                 s = s + W_PUNYCODE_LINK
         # sender says paypal/microsoft/amazon but domain is weird
-        if "paypal" in frm.lower() and "paypal.com" not in frm.lower():
-            s = s + W_BRAND_MISMATCH
-        if "micrpathliboft" in frm.lower() and "micrpathliboft.com" not in frm.lower():
-            s = s + W_BRAND_MISMATCH
-        if "amazon" in frm.lower() and "amazon.com" not in frm.lower():
-            s = s + W_BRAND_MISMATCH
+        for brand in BRANDS:
+            if brand in frm.lower() and f"{brand}.com" not in frm.lower():
+                s = s + W_BRAND_MISMATCH
+
         if "spf=fail" in low or "dmarc=fail" in low:
             s = s + W_AUTH_FAIL
+
         # reply-to different from from
-        try:
-            rt = re.search("Reply-To: (.*)", raw).group(1)
-            m1 = re.search("@([a-zA-Z0-9.-]+)", frm).group(1)
-            m2 = re.search("@([a-zA-Z0-9.-]+)", rt).group(1)
-            if m1 != m2:
-                s = s + W_REPLY_TO_MISMATCH
-        except:
-            pass
+        from_domain = sender_domain(frm)
+        reply_domain = sender_domain(header(raw, "Reply-To")) #we first extract the Reply-To field
+
+        if from_domain and reply_domain and (from_domain != reply_domain):
+            s = s + W_REPLY_TO_MISMATCH
+
         scores[fn] = s
         if s >= PHISHING_THRESHOLD:
             verdicts.append((fn, "PHISHING", s))
@@ -92,4 +114,9 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("you have to pass a folder as argument", file=sys.stderr)
         sys.exit(2)
+    try: 
+        check_mail(sys.argv[1])
+    except FileNotFoundError:
+        print("error: No such folder", file=sys.stderr)
+        sys.exit(1)
     check_mail(sys.argv[1])
