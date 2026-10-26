@@ -67,16 +67,13 @@ def check_mail(folder):
 
     scores = {}
     verdicts = []
-
-    if flagged is None:
-        flagged = []
     
     files = os.listdir(folder)
     for fn in files:
         if not fn.endswith(".eml"):
             continue
         with open(os.path.join(folder,fn), encoding="utf-8", errors="ignore") as raw:
-            raw.read()
+            raw = raw.read()
             
         s = 0
         
@@ -109,7 +106,8 @@ def check_mail(folder):
             s = s + W_REPLY_TO_MISMATCH
 
         scores[fn] = s
-        verdicts.append((fn, compute_verdict(s), s)) #append a tuple of filename, verdict, score  
+        verdicts.append((fn, compute_verdict(s), s)) #append a tuple of filename, verdict, score 
+    return verdicts
 
 
 if __name__ == "__main__":
