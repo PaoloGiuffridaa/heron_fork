@@ -30,7 +30,9 @@ def check_mail(folder, flagged = None):
     for fn in files:
         if not fn.endswith(".eml"):
             continue
-        raw = open(os.path.join(folder,fn), encoding="utf-8", errors="ignore").read()
+        with open(os.path.join(folder,fn), encoding="utf-8", errors="ignore") as raw:
+            raw.read()
+            
         s = 0
         try:
             frm = re.search("From: (.*)", raw).group(1)
@@ -80,9 +82,10 @@ def check_mail(folder, flagged = None):
     print("checked", len(scores), "mails")
     for v in verdicts:
         print(" ", v[0], "->", v[1], "(score", str(v[2]) + ")")
-    out = open("results.txt", "w")
-    out.write(str(verdicts))
-    out.close()
+
+    with open("results.txt", "w") as out:
+        out.write(str(verdicts))
+    
     print("flagged:", flagged)
 
 if __name__ == "__main__":
