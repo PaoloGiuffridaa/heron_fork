@@ -48,6 +48,55 @@ def report(verdicts):
     
     print("flagged:", [v[0] for v in verdicts if v[1] == 'PHISHING'])
 
+def keyword_score(raw):
+    """Assign one point for easch keyword found in the email"""
+    low = raw.lower()
+    return sum(W_KEYWORD for kw in KEYWORDS if kw in low)
+
+def link_score(raw):
+    """Assign points for Links to Ip addresses or punycode domain."""
+    s = 0
+    urls = re.findall("https?://[^\\s\"'<>]+", raw)
+    for u in urls:
+        if re.match("https?://[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+", u):
+            s = s + W_IP_LINK  # ip address url, very bad
+        if "xn--" in u:
+            s = s + W_PUNYCODE_LINK
+    return s
+
+def brand_score(frm):
+    """Assign points when the sender claim tho be an organization but the domain missmatch"""
+    s = 0
+    for brand in BRANDS:
+        if brand in frm.lower() and f"{brand}.com" not in frm.lower():
+            s = s + W_BRAND_MISMATCH
+    return s
+
+def auth_score(raw):
+    low = raw.lower()
+    """assign points when the SPF or DMARC failed"""
+    if "spf=fail" in low or "dmarc=fail" in low:
+        return + W_AUTH_FAIL
+    return 0
+
+def reply_to_score(frm, reply_to):
+    """assign point when sender and reply-to fields missmatch"""
+    from_domain = sender_domain(frm)
+    reply_domain = sender_domain(reply_to) 
+
+    if from_domain and reply_domain and (from_domain != reply_domain):
+        return W_REPLY_TO_MISMATCH
+    return 0
+
+def score_email(raw):
+    """computes the score based on the indicators, given an email"""
+    msg = message_from_string(raw, policy.default)
+    frm = str(msg.get("From", ""))
+    reply_to = str(msg.get("Reply-To", ""))
+
+    score = sum(keyword_score(raw), link_score(raw), brand_score(frm), auth_score(raw), reply_to_score(frm,reply_to))
+
+
 def check_mail(folder):
     """Score every email file in the folder. Return (filename, verdict, score) tuples."""
 
@@ -60,42 +109,9 @@ def check_mail(folder):
             continue
         with open(os.path.join(folder,fn), encoding="utf-8", errors="ignore") as raw:
             raw = raw.read()
-            
-        s = 0
-        
-        msg = message_from_string(raw, policy.default)
-        frm = str(msg.get("From", ""))
-        reply_to = str(msg.get("Reply-To", ""))
-        
-        low = raw.lower()
 
-        for kw in KEYWORDS:
-            if kw in low:
-                s = s + W_KEYWORD
-        # links that look bad
-        urls = re.findall("https?://[^\\s\"'<>]+", raw)
-        for u in urls:
-            if re.match("https?://[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+", u):
-                s = s + W_IP_LINK  # ip address url, very bad
-            if "xn--" in u:
-                s = s + W_PUNYCODE_LINK
-        # sender says paypal/microsoft/amazon but domain is weird
-        for brand in BRANDS:
-            if brand in frm.lower() and f"{brand}.com" not in frm.lower():
-                s = s + W_BRAND_MISMATCH
-
-        if "spf=fail" in low or "dmarc=fail" in low:
-            s = s + W_AUTH_FAIL
-
-        # reply-to different from from
-        from_domain = sender_domain(frm)
-        reply_domain = sender_domain(reply_to) 
-
-        if from_domain and reply_domain and (from_domain != reply_domain):
-            s = s + W_REPLY_TO_MISMATCH
-
-        scores[fn] = s
-        verdicts.append((fn, compute_verdict(s), s)) #append a tuple of filename, verdict, score 
+        scores[fn] = score_email(raw)
+        verdicts.append((fn, compute_verdict(scores[fn]), scores[fn])) #append a tuple of filename, verdict, score 
     return verdicts
 
 
