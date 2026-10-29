@@ -3,22 +3,16 @@
 import os
 import sys
 
-from heron.scorer import compute_verdict, score_email
+from heron.scorer import triage
+from heron.parser import parse_eml
+from heron.models import TriageResult, Verdict
 
-def report(verdicts):
+def report(verdicts: list[TriageResult]) -> None:
     """print the verdicts and save them in the result file"""
-    print(f"checked {len(verdicts)} mails")
     for v in verdicts:
-        print(" ", v[0], "->", v[1], "(score", str(v[2]) + ")")
-    with open("results.txt", "w") as out:
-        out.write(str(verdicts))
-    
-    print("flagged:", [v[0] for v in verdicts if v[1] == 'PHISHING'])
+        print(f"{v.email_id:<28} -> {v.verdict}, (score: {v.score})")
 
-
-
-
-def check_mail(folder):
+def check_mail(folder)-> list[TriageResult]:
     """Score every email file in the folder. Return (filename, verdict, score) tuples."""
 
     scores = {}
@@ -30,9 +24,9 @@ def check_mail(folder):
             continue
         with open(os.path.join(folder,fn), encoding="utf-8", errors="ignore") as raw:
             raw = raw.read()
-        
-        scores[fn] = score_email(raw)
-        verdicts.append((fn, compute_verdict(scores[fn]), scores[fn])) #append a tuple of filename, verdict, score 
+        parsed_email = parse_eml(raw, fn)
+        result = triage(parsed_email)
+        verdicts.append(result) 
     return verdicts
 
 def main(argv: list[str] | None = None):

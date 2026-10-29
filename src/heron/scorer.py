@@ -1,25 +1,35 @@
 """Compute the indicators scores and the classification outcome"""
-
-from email import message_from_string, policy
+from typing import Callable
 from heron.features import keyword_score, link_score, brand_score, auth_score, reply_to_score
+from heron.models import ParsedEmail, TriageResult, Verdict
+
 
 PHISHING_THRESHOLD = 5
 SUSPICIOUS_THRESHOLD = 3
 
-def compute_verdict(score):
+ALL_CHECKS : tuple[Callable[[ParsedEmail], int], ...]= (
+    keyword_score,
+    link_score,
+    brand_score,
+    auth_score,
+    reply_to_score
+)
+
+def compute_verdict(score: int) :
     """Map a score to a verdict"""
     if score >= PHISHING_THRESHOLD:
-        return "PHISHING"
+        return Verdict.PHISHING
     elif score >= SUSPICIOUS_THRESHOLD:
-        return  "suspicious"
+        return  Verdict.SUSPICIOUS
     else:
-        return "ok"
+        return Verdict.OK
 
-def score_email(raw):
-    """computes the score based on the indicators, given an email"""
-    msg = message_from_string(raw, policy=policy.default)
-    frm = str(msg.get("From", ""))
-    reply_to = str(msg.get("Reply-To", ""))
-
-    score = (keyword_score(raw) + link_score(raw) + brand_score(frm) + auth_score(raw) + reply_to_score(frm,reply_to))
-    return score
+def triage(email: ParsedEmail) -> TriageResult:
+    """Run every check on one email and return the outcome"""
+    score = sum(check(email) for check in ALL_CHECKS)
+    verdict = compute_verdict(score)
+    return TriageResult(
+        email_id = email.email_id,
+        score = score,
+        verdict = verdict
+    )
