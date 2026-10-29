@@ -16,7 +16,9 @@ BRANDS = ["paypal", "microsoft", "amazon"]
 KEYWORDS = ["urgent", "verify", "suspended", "password", "expires", "act now",
             "congratulations", "winner", "claim", "immediately", "gift card"]
 
-
+#we want to compute path only one time (is computationally expensive) and reuse it in the scoring functions
+_URL_RE = re.compile(r"https?://[^\\s\"'<>]+")
+_IP_URL_RE = re.compile(r"https?://[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")
 
 def keyword_score(raw):
     """Assign one point for easch keyword found in the email"""
@@ -26,9 +28,9 @@ def keyword_score(raw):
 def link_score(raw):
     """Assign points for Links to Ip addresses or punycode domain."""
     s = 0
-    urls = re.findall("https?://[^\\s\"'<>]+", raw)
+    urls = re.findall(_URL_RE, raw)
     for u in urls:
-        if re.match("https?://[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+", u):
+        if re.match(_IP_URL_RE, u):
             s = s + W_IP_LINK  # ip address url, very bad
         if "xn--" in u:
             s = s + W_PUNYCODE_LINK
