@@ -1,6 +1,6 @@
 [project]
 name = "heron"
-version = "0.2.0"
+version = "0.3.0"
 description = "Phising email triange"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -9,10 +9,19 @@ dependencies = []
 
 [build-system]
 requires = ["hatchling >= 1.27"]
-build-backend = "hatchiling.build"
+build-backend = "hatchling.build"
 
 [project.scripts]
 heron = "heron.cli:main"
 
 [tool.hetch.build.targets.wheel]
 packages = ["src/heron"]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.1",
+    "pre-commit>=4.7.0",
+    "ruff>=0.17.3",
+    "sphinx>=9.1.1",
+    "sphinx-rtd-theme>=3.1.0",
+]
