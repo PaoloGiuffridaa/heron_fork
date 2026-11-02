@@ -1,0 +1,18 @@
+[project]
+name = "heron"
+version = "0.2.0"
+description = "Phising email triange"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = []
+
+[build-system]
+requires = ["hatchling >= 1.27"]
+build-backend = "hatchiling.build"
+
+[project.scripts]
+heron = "heron.cli:main"
+
+[tool.hetch.build.targets.wheel]
+packages = ["src/heron"]

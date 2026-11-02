@@ -1,7 +1,10 @@
 """Command Line Interface: `python -m heron <folder>`"""
 
 import argparse
+from dataclasses import asdict
+import json
 import os
+import pathlib
 import sys
 
 from heron.scorer import triage
@@ -15,8 +18,14 @@ def build_parser() -> argparse.ArgumentParser:
         prog="heron",
         description="Triage of phising email."
     )
-    parser.add_argument("folder", 
-    help="a folder containing `.eml` files"
+    parser.add_argument(
+        "folder", 
+        help="a folder containing `.eml` files"
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true", #if the argument is passed the arg is == True 
+        help="machine readable output"
     )
     return parser
 
@@ -47,6 +56,9 @@ def main(argv: list[str] | None = None):
     args = build_parser().parse_args(argv)
     try: 
         verdicts = check_mail(args.folder)
+        if args.json:
+            with open("output.json", "w") as f:
+                json.dump([asdict(v) for v in verdicts], f)
         report(verdicts)
     except FileNotFoundError:
         print("error: No such folder", file=sys.stderr)
