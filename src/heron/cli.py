@@ -1,11 +1,24 @@
 """Command Line Interface: `python -m heron <folder>`"""
 
+import argparse
 import os
 import sys
 
 from heron.scorer import triage
 from heron.parser import parse_eml
 from heron.models import TriageResult, Verdict
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """return the parser of the CLI arguments"""
+    parser = argparse.ArgumentParser(
+        prog="heron",
+        description="Triage of phising email."
+    )
+    parser.add_argument("folder", 
+    help="a folder containing `.eml` files"
+    )
+    return parser
 
 def report(verdicts: list[TriageResult]) -> None:
     """print the verdicts and save them in the result file"""
@@ -31,12 +44,9 @@ def check_mail(folder)-> list[TriageResult]:
 
 def main(argv: list[str] | None = None):
     """run the triange on the given folder"""
-    args = sys.argv[1:] if argv is None else argv
-    if len(args) != 1:
-        print("you have to pass a folder as argument", file=sys.stderr)
-        sys.exit(2)
+    args = build_parser().parse_args(argv)
     try: 
-        verdicts = check_mail(sys.argv[1])
+        verdicts = check_mail(args.folder)
         report(verdicts)
     except FileNotFoundError:
         print("error: No such folder", file=sys.stderr)
