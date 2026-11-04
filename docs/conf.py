@@ -1,8 +1,5 @@
 project = "heron"
-extension = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon"
-]
+extension = ["sphinx.ext.autodoc", "sphinx.ext.napoleon"]
 
 napoleon_google_docstring = False
 html_theme = "sphinx_rtd_theme"
