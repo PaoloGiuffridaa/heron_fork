@@ -1,16 +1,15 @@
 """Command Line Interface: `python -m heron <folder>`"""
 
 import argparse
-from dataclasses import asdict
 import json
 import os
+import re  # noqa: F401
 import sys
+from dataclasses import asdict
 
-import re #noqa: F401
-
-from heron.scorer import triage
+from heron.models import TriageResult
 from heron.parser import parse_eml
-from heron.models import TriageResult, Verdict
+from heron.scorer import triage
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -37,10 +36,9 @@ def report(verdicts: list[TriageResult]) -> None:
         print(f"{v.email_id:<28} -> {v.verdict}, (score: {v.score})")
 
 
-def check_mail(folder) -> list[TriageResult]:
+def check_mail(folder: str) -> list[TriageResult]:
     """Score every email file in the folder. Return (filename, verdict, score) tuples."""
 
-    scores = {}
     verdicts = []
 
     files = os.listdir(folder)
@@ -48,14 +46,14 @@ def check_mail(folder) -> list[TriageResult]:
         if not fn.endswith(".eml"):
             continue
         with open(os.path.join(folder, fn), encoding="utf-8", errors="ignore") as raw:
-            raw = raw.read()
-        parsed_email = parse_eml(raw, fn)
+            raw_email = raw.read()
+        parsed_email = parse_eml(raw_email, fn)
         result = triage(parsed_email)
         verdicts.append(result)
     return verdicts
 
 
-def main(argv: list[str] | None = None):
+def main(argv: list[str] | None = None) -> None:
     """run the triange on the given folder"""
     args = build_parser().parse_args(argv)
     try:

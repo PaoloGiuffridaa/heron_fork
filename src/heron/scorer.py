@@ -1,9 +1,9 @@
 """Compute the indicators scores and the classification outcome"""
 
-from typing import Callable
-from heron.features import keyword_score, link_score, brand_score, auth_score, reply_to_score
-from heron.models import ParsedEmail, TriageResult, Verdict
+from collections.abc import Callable
 
+from heron.features import auth_score, brand_score, keyword_score, link_score, reply_to_score
+from heron.models import ParsedEmail, TriageResult, Verdict
 
 PHISHING_THRESHOLD = 5
 SUSPICIOUS_THRESHOLD = 3
@@ -17,7 +17,7 @@ ALL_CHECKS: tuple[Callable[[ParsedEmail], int], ...] = (
 )
 
 
-def compute_verdict(score: int):
+def compute_verdict(score: int) -> Verdict:
     """Map a score to a verdict"""
     if score >= PHISHING_THRESHOLD:
         return Verdict.PHISHING

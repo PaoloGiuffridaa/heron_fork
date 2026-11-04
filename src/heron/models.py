@@ -12,7 +12,7 @@ class ParsedEmail:
     reply_to_domain: str | None
     auth_result: str
     text: str
-    links: tuple[str]
+    links: tuple[str, ...]
 
 
 email = ParsedEmail(

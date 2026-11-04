@@ -1,9 +1,11 @@
 """Phishing indicators scoring functions."""
 
 import re
+
 from heron.models import ParsedEmail
 
-# __all__ = ["keyword_score", "link_score", "brand_score", "auth_score", "reply_to_score"]    #if the code scales is not mantainable, avoid use this
+# __all__ = ["keyword_score", "link_score", "brand_score", "auth_score", "reply_to_score"]
+# if the code scales is not mantainable, avoid use this
 
 W_KEYWORD = 1
 W_IP_LINK = 3
@@ -28,7 +30,8 @@ KEYWORDS = [
     "gift card",
 ]
 
-# we want to compute path only one time (is computationally expensive) and reuse it in the scoring functions
+# we want to compute path only one time (is computationally expensive)
+# and reuse it in the scoring functions
 _IP_URL_RE = re.compile(r"https?://[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")
 
 
