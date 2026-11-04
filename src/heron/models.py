@@ -27,7 +27,7 @@ class TriageResult():
     """The verdict of an phishind detection system, given an email"""
     email_id: str
     score: int
-    verdict: Verdict
+    verdict: "Verdict"
 
 class Verdict(StrEnum):
     """The possible verdicts of the phishing detection system"""
