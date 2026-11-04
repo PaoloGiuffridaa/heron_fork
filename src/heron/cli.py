@@ -13,7 +13,13 @@ from heron.models import TriageResult, Verdict
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """return the parser of the CLI arguments"""
+    """return the parser of the CLI arguments
+    
+    Returns
+    -------
+    argparse.ArgumentParser
+        The parser of the CLI arguments
+    """
     parser = argparse.ArgumentParser(
         prog="heron",
         description="Triage of phising email."

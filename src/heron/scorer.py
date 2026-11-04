@@ -25,7 +25,18 @@ def compute_verdict(score: int) :
         return Verdict.OK
 
 def triage(email: ParsedEmail) -> TriageResult:
-    """Run every check on one email and return the outcome"""
+    """Run every check on one email and return the outcome
+    
+    Parameters
+    -----------
+    email: ParsedEmail
+        The parsed email to be scored
+
+    Returns
+    -------
+    TriageResult
+        The result of the triage, including the score and the verdict
+    """
     score = sum(check(email) for check in ALL_CHECKS)
     verdict = compute_verdict(score)
     return TriageResult(
