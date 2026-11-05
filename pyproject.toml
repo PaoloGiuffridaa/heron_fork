@@ -12,7 +12,14 @@ heron = "heron.cli:main"
 
 [dependency-groups]  # developer tools: never published; `uv sync` installs them
 dev = [
-  "ruff", "mypy", "pre-commit", "sphinx", "sphinx-rtd-theme",
+  "ruff",
+  "mypy",
+  "pre-commit",
+  "sphinx",
+  "sphinx-rtd-theme",
+  "pytest",
+  "pytest-cov>=7.1.0",
+  "hypothesis>=6.170.14",
 ]
 
 [build-system]
@@ -35,3 +42,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "S"]  # S = security rules (ban
 [tool.mypy]
 strict = true
 files = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
