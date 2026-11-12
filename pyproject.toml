@@ -5,7 +5,9 @@ description = "Phishing email triage: parse .eml files, extract indicators, prod
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"  # SPDX expression (PEP 639)
-dependencies = []  # core stays dependency-free; extras: [api], [ai]
+dependencies = [
+    "rapidfuzz>=3.14.6",
+]  # core stays dependency-free; extras: [api], [ai]
 
 [project.scripts]
 heron = "heron.cli:main"
@@ -17,7 +19,7 @@ dev = [
   "pre-commit",
   "sphinx",
   "sphinx-rtd-theme",
-  "pytest",
+  "pytest>=9.2.0",
   "pytest-cov>=7.1.0",
   "hypothesis>=6.170.14",
 ]
@@ -46,3 +48,11 @@ files = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.coverage.run]
+source = ["heron"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true

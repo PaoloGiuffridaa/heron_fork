@@ -4,8 +4,7 @@ from heron.models import ParsedEmail
 
 
 def make_email(
-    *,  # the argumets before the * can be passed without keywords,
-    # the ones after must be passed with keywords
+    *,  # the arguments after * must be passed with keywords
     sender: str = "Alice <alice@example.com>",
     from_domain: str | None = "example.com",
     reply_to_domain: str | None = None,

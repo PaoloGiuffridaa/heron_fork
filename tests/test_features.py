@@ -13,6 +13,7 @@ from tests.helpers import make_email
 def test_urgency_fires_once_for_many_keywords() -> None:
     email = make_email(text="urgent: verify your password immediately")
     findings = check_urgency(email)
+
     assert [f.code for f in findings] == ["urgency"]
     assert findings[0].weight == W_URGENCY
 

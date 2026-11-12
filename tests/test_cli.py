@@ -15,3 +15,9 @@ def test_cli_triages_the_six_samples(capsys: pytest.CaptureFixture[str]) -> None
     )  # when executing the command, the output is captured by capsys.readouterr().out
     assert exit_code == 0
     assert out.splitlines()[-1] == "6 emails: 2 phishing, 1 suspicious, 3 benign"
+
+
+def test_cli_missing_file(capsys: pytest.CaptureFixture[str]) -> None:
+    exit_code = main([str(SAMPLES) + "aaa"])
+
+    assert exit_code == 2

@@ -3,6 +3,8 @@
 import re
 from collections.abc import Callable
 
+from rapidfuzz.distance import Levenshtein
+
 from heron.models import Finding, ParsedEmail
 
 W_URGENCY = 2
@@ -29,6 +31,11 @@ KEYWORDS = [
 ]
 
 _IP_URL_RE = re.compile("https?://[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")
+
+
+def levenshtein(a: str, b: str) -> int:
+    """Return the number of one-character edits that turn ``a`` into ``b``."""
+    return Levenshtein.distance(a, b)
 
 
 def check_urgency(email: ParsedEmail) -> list[Finding]:

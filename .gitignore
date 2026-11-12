@@ -14,3 +14,8 @@ docs/_build/
 .env
 
 output.json
+.idea/
+
+.hypothesis/
+
+mutants/
