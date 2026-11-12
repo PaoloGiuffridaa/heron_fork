@@ -23,3 +23,17 @@ jobs:
         run: uv run mypy src
       - name: Docs
         run: uv run sphinx-build -W docs docs/_build
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"] #test on multiple versions of python
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --locked
+      - name: Tests with coverage
+        run: uv run pytest --cov
