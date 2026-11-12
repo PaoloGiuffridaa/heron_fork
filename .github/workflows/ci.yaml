@@ -22,4 +22,4 @@ jobs:
       - name: Type Check
         run: uv run mypy src
       - name: Docs
-        run: uv run sphhinx-build -W docs docs/_build
+        run: uv run sphinx-build -W docs docs/_build
