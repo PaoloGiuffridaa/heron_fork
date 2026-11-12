@@ -1,0 +1,6 @@
+{
+    "yaml.schemas": {
+        "https://www.schemastore.org/yamlfmt.json": "file:///home/giuff/Uni/Magistrale/Primo%20Anno/Primo%20Semestre/Industrial%20Software%20Development/heron_fork/.github/workflows/ci.yaml",
+        "https://www.schemastore.org/yamllint.json": "file:///home/giuff/Uni/Magistrale/Primo%20Anno/Primo%20Semestre/Industrial%20Software%20Development/heron_fork/.github/workflows/ci.yaml"
+    }
+}
