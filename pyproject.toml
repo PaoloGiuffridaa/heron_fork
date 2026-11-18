@@ -12,8 +12,15 @@ heron = "heron.cli:main"
 
 [dependency-groups]  # developer tools: never published; `uv sync` installs them
 dev = [
-  "ruff", "mypy", "pre-commit", "sphinx", "sphinx-rtd-theme",
-  "pytest", "pytest-cov", "hypothesis",
+  "ruff",
+  "mypy",
+  "pre-commit",
+  "sphinx",
+  "sphinx-rtd-theme",
+  "pytest",
+  "pytest-cov",
+  "hypothesis",
+  "diff-cover>=11.0.1",
 ]
 
 [build-system]

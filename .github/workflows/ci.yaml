@@ -31,9 +31,19 @@ jobs:
         python-version: ["3.12", "3.13"] #test on multiple versions of python
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # fetch all history for diff-cover to work
       - uses: astral-sh/setup-uv@v9.0.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: uv sync --locked
       - name: Tests with coverage
-        run: uv run pytest --cov
+        run: uv run pytest --cov --cov-report=term --cov-report=xml
+      - name: Coverage of the changed lines
+        if: github.event_name == 'pull_request'
+        run: uv run diff-cover coverage.xml --compare-branch=origin/main/${{ github.head_ref }} --fail-under=85
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
