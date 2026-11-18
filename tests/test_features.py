@@ -3,11 +3,13 @@ import pytest
 from heron.features import (
     W_AUTH_FAIL,
     W_BRAND_MISMATCH,
+    W_EXECUTABLE_LINK,
     W_LOOKALIKE_SENDER,
     W_REPLY_TO_MISMATCH,
     W_URGENCY,
     check_auth,
     check_brand,
+    check_executable_link,
     check_links,
     check_lookalike_sender,
     check_reply_to,
@@ -98,3 +100,12 @@ def test_check_lookalike_sender(domain: str | None, details: list[str]) -> None:
     findings = check_lookalike_sender(make_email(from_domain=domain))
     assert [f.detail for f in findings] == details
     assert all(f.weight == W_LOOKALIKE_SENDER for f in findings)
+
+
+def test_executable_link_fires_for_a_program_but_not_for_a_page() -> None:
+    email = make_email(
+        links=("https://files.example/invoice.pdf.exe", "https://example.com/a.html")
+    )
+    assert [(f.code, f.detail, f.weight) for f in check_executable_link(email)] == [
+        ("executable_link", "https://files.example/invoice.pdf.exe", W_EXECUTABLE_LINK)
+    ]
