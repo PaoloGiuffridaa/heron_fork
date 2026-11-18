@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions # the actions in .github/workflows/
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: uv # pyproject.toml + uv.lock
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7 # let a new release settle before proposing it
