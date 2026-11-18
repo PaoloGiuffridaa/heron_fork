@@ -16,6 +16,8 @@ jobs:
       - uses: astral-sh/setup-uv@v9.0.0
         with:
           python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
       - run: uv sync --locked
       - name: Lint
         run: uv run ruff check . && uv run ruff format --check .
@@ -36,12 +38,14 @@ jobs:
       - uses: astral-sh/setup-uv@v9.0.0
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
       - run: uv sync --locked
       - name: Tests with coverage
         run: uv run pytest --cov --cov-report=term --cov-report=xml
       - name: Coverage of the changed lines
         if: github.event_name == 'pull_request'
-        run: uv run diff-cover coverage.xml --compare-branch=origin/main/${{ github.head_ref }} --fail-under=85
+        run: uv run diff-cover coverage.xml --compare-branch=origin/${{ github.base_ref }} --fail-under=90
       - uses: actions/upload-artifact@v7
         if: always()
         with:
